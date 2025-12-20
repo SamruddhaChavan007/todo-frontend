@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -72,4 +74,11 @@ dependencies {
 
     //Retrofit
     implementation(libs.retrofit)
+
+    //ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    //Hilt
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
 }
