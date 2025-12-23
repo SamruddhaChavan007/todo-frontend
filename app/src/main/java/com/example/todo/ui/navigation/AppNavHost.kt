@@ -1,6 +1,10 @@
 package com.example.todo.ui.navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,12 +21,21 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     homeScreen: @Composable () -> Unit, // you can pass your Home/Todo screen here
 ) {
-    val startDestination =
-        if (authVm.hasValidSession()) Routes.HOME else Routes.LOGIN
+    val isLoggedIn by authVm.isLoggedIn.collectAsState()
+
+    LaunchedEffect(Unit) {
+        authVm.checkSession()
+    }
+
+    if (isLoggedIn == null) {
+        // ToDo: Splash Screen
+        Text("Loading...")
+        return
+    }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = if (isLoggedIn == true) Routes.HOME else Routes.LOGIN,
         modifier = modifier
     ) {
         composable(Routes.LOGIN) {

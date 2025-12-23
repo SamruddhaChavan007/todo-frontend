@@ -92,19 +92,20 @@ fun LoginScreen(
             Text(if (isLoading) "Signing in..." else "Login")
         }
 
+        if (!errorText.isNullOrBlank()) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = errorText,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         Spacer(Modifier.height(10.dp))
 
         TextButton(
             onClick = onGoSignup
         ) {
-            if (!errorText.isNullOrBlank()) {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = errorText,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
             Text(text = "Don't have an account? Sign Up")
         }
     }

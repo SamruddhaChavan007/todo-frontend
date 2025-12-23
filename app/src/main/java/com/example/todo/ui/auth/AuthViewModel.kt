@@ -1,27 +1,38 @@
 package com.example.todo.ui.auth
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.todo.data.repo.AuthRepository
 import com.example.todo.ui.state.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repo: AuthRepository
-): ViewModel() {
+) : ViewModel() {
     private val _state = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val state: StateFlow<UiState<Unit>> = _state
+    private val _isLoggedIn = MutableStateFlow<Boolean?>(null)
+    val isLoggedIn: StateFlow<Boolean?> = _isLoggedIn
 
-    fun login(email: String, password: String){
+    fun checkSession() {
+        viewModelScope.launch {
+            _isLoggedIn.value = repo.hasValidSession()
+        }
+    }
+
+    fun login(email: String, password: String) {
         _state.value = UiState.Loading
-        viewModelScope.launch{
+        viewModelScope.launch {
             runCatching { repo.login(email, password) }
-                .onSuccess { _state.value = UiState.Success(Unit) }
+                .onSuccess {
+                    _state.value = UiState.Success(Unit)
+                    _isLoggedIn.value = true
+                }
                 .onFailure { _state.value = UiState.Error(it.message ?: "Login Failed") }
         }
     }
@@ -30,21 +41,23 @@ class AuthViewModel @Inject constructor(
         _state.value = UiState.Loading
         viewModelScope.launch {
             runCatching { repo.register(email, password) }
-                .onSuccess { _state.value = UiState.Success(Unit) }
+                .onSuccess {
+                    _state.value = UiState.Success(Unit)
+                    _isLoggedIn.value = true
+                }
                 .onFailure { _state.value = UiState.Error(it.message ?: "Register failed") }
         }
     }
 
     fun logout() {
-        viewModelScope.launch { repo.logout() }
+        viewModelScope.launch {
+            repo.logout()
+            _isLoggedIn.value = false
+            _state.value = UiState.Idle
+        }
     }
 
     fun reset() {
         _state.value = UiState.Idle
     }
-
-    suspend fun hasValidSession(): Boolean {
-        return repo.hasValidSession()
-    }
-
 }
