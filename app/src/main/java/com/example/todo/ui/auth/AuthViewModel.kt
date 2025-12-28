@@ -7,6 +7,7 @@ import com.example.todo.ui.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,10 +19,13 @@ class AuthViewModel @Inject constructor(
     val state: StateFlow<UiState<Unit>> = _state
     private val _isLoggedIn = MutableStateFlow<Boolean?>(null)
     val isLoggedIn: StateFlow<Boolean?> = _isLoggedIn
+    private val _sessionChecked = MutableStateFlow(false)
+    val sessionChecked: StateFlow<Boolean> = _sessionChecked
 
     fun checkSession() {
         viewModelScope.launch {
             _isLoggedIn.value = repo.hasValidSession()
+            _sessionChecked.value = true
         }
     }
 

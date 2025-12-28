@@ -29,6 +29,19 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun hasValidSession(): Boolean {
-        return tokenStore.tokenFlow.first().isNullOrBlank().not()
+        val token = tokenStore.tokenFlow.first()
+            ?: return false
+
+        return try {
+            api.logout()
+            true
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 401) {
+                tokenStore.clear()
+                false
+            } else {
+                true
+            }
+        }
     }
 }
