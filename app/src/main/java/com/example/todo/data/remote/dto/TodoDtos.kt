@@ -24,3 +24,7 @@ data class CreateTodoRequest(
     val title: String,
     val description: String? = null
 )
+@Serializable
+data class CreateTodoResponse(
+    val todo: TodoDto
+)

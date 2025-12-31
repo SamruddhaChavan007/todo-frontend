@@ -37,7 +37,7 @@ class TodosViewModel @Inject constructor(
                     val unauthorized = (err as? HttpException)?.code() == 401
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        todos = emptyList(),
+                        todos = _uiState.value.todos,
                         errorMessage = if (unauthorized) "Session expired. Please login again." else "Could not load todos. Please try again.",
                         unauthorized = unauthorized
                     )

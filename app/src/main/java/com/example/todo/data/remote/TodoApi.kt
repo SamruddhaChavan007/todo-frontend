@@ -2,10 +2,10 @@ package com.example.todo.data.remote
 
 import com.example.todo.data.remote.dto.AuthResponse
 import com.example.todo.data.remote.dto.CreateTodoRequest
+import com.example.todo.data.remote.dto.CreateTodoResponse
 import com.example.todo.data.remote.dto.ListTodosResponse
 import com.example.todo.data.remote.dto.LoginRequest
 import com.example.todo.data.remote.dto.RegisterRequest
-import com.example.todo.data.remote.dto.TodoDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -31,5 +31,5 @@ interface TodoApi {
     @POST("todos")
     suspend fun createTodo(
         @Body body: CreateTodoRequest
-    ): TodoDto
+    ): CreateTodoResponse
 }

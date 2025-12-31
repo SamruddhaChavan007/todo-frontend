@@ -16,11 +16,13 @@ class TodosRepository @Inject constructor(
         Result.success(api.listTodos().todos)
     } catch (e: HttpException) {
         Result.failure(e)
+    } catch (e: IOException){
+        Result.failure(e)
     }
 
     suspend fun createTodo(title: String, description: String?): Result<TodoDto> = try {
         val body = CreateTodoRequest(title.trim(), description = description?.trim()?.ifBlank { null })
-        Result.success(api.createTodo(body))
+        Result.success(api.createTodo(body).todo)
     } catch (e: HttpException){
         Result.failure(e)
     } catch (e: IOException){

@@ -12,51 +12,39 @@ import androidx.navigation.compose.rememberNavController
 import com.example.todo.ui.auth.AuthViewModel
 import com.example.todo.ui.auth.LoginScreen
 import com.example.todo.ui.auth.RegisterScreen
+import com.example.todo.ui.todos.TodosScreen
 
 @Composable
 fun AppNavHost(
     authVm: AuthViewModel,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    homeScreen: @Composable () -> Unit,
 ) {
     val isLoggedIn by authVm.isLoggedIn.collectAsState()
 
+    // Session check once at startup
     LaunchedEffect(Unit) {
         authVm.checkSession()
     }
 
-    if (isLoggedIn == null) return
+    val loggedIn = isLoggedIn ?: return
 
-    LaunchedEffect(isLoggedIn) {
-        when (isLoggedIn) {
-            true -> {
-                navController.navigate(Routes.HOME) {
-                    popUpTo(0) { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-
-            false -> {
-                navController.navigate(Routes.LOGIN) {
-                    popUpTo(0) { inclusive = true }
-                    launchSingleTop = true
-                }
-            }
-
-            null -> Unit
-        }
-    }
+    val startDestination = if (loggedIn) Routes.HOME else Routes.LOGIN
 
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         composable(Routes.LOGIN) {
             LoginScreen(
                 vm = authVm,
-                onSuccess = { },
+                onSuccess = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 onGoSignup = {
                     navController.navigate(Routes.REGISTER) {
                         launchSingleTop = true
@@ -68,7 +56,13 @@ fun AppNavHost(
         composable(Routes.REGISTER) {
             RegisterScreen(
                 vm = authVm,
-                onSuccess = { },
+                onSuccess = {
+                    navController.navigate(Routes.HOME) {
+                        // clears login/register from backstack
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 onGoLogin = {
                     navController.popBackStack()
                 }
@@ -76,7 +70,15 @@ fun AppNavHost(
         }
 
         composable(Routes.HOME) {
-            homeScreen()
+            TodosScreen(
+                onUnauthorized = {
+                    authVm.logout()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.HOME) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
     }
 }
